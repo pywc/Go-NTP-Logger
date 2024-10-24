@@ -10,7 +10,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/gopacket/pcapgo"
 	"github.com/pywc/Go-NTP-Logger/config"
 	"github.com/pywc/Go-NTP-Logger/ntp"
 	"github.com/pywc/Go-NTP-Logger/prefix"
@@ -22,16 +21,16 @@ func shouldIgnorePacket(addr *net.UDPAddr) bool {
 	return strings.HasSuffix(ip, ".1")
 }
 
-func handleNTPPacket(conn *net.UDPConn, packet ntp.PacketData, prefixes []*net.IPNet, writer *pcapgo.Writer) {
+func handleNTPPacket(conn *net.UDPConn, packet ntp.PacketData, prefixes []*net.IPNet, fm *ntp.FileManager) {
 	// Ignore packets coming from router addresses or if not valid NTP packets
-	isNTP, version := ntp.parseNTPPacket(packet.Data)
+	isNTP, version := ntp.ParseNTPPacket(packet.Data)
 	if shouldIgnorePacket(packet.Addr) || !isNTP {
 		return
 	}
 
 	// Check if the source IP matches the allowed prefixes
 	if prefix.IPMatchesPrefixes(packet.Addr.IP, prefixes) {
-		ntp.logNTPPacket(packet, version, writer)
+		fm.LogNTPPacket(packet, version)
 	}
 
 	// Send a true NTP response
@@ -39,7 +38,7 @@ func handleNTPPacket(conn *net.UDPConn, packet ntp.PacketData, prefixes []*net.I
 }
 
 func sendNTPResponse(conn *net.UDPConn, version int, addr *net.UDPAddr, requestData []byte) {
-	response := ntp.makeNTPResponse(version, requestData)
+	response := ntp.MakeNTPResponse(version, requestData)
 
 	_, err := conn.WriteToUDP(response, addr)
 	if err != nil {
@@ -48,17 +47,15 @@ func sendNTPResponse(conn *net.UDPConn, version int, addr *net.UDPAddr, requestD
 }
 
 // workerPool processes incoming NTP requests using multiple workers.
-func workerPool(conn *net.UDPConn, prefixes []*net.IPNet, fileManager *ntp.FileManager, packets <-chan ntp.PacketData, wg *sync.WaitGroup) {
+func workerPool(conn *net.UDPConn, prefixes []*net.IPNet, fm *ntp.FileManager, packets <-chan ntp.PacketData, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for packet := range packets {
-		handleNTPPacket(conn, packet, prefixes, fileManager.writer)
+		handleNTPPacket(conn, packet, prefixes, fm)
 	}
 }
 
 // startNTPServer initializes the UDP server to handle NTP requests.
 func startNTPServer(prefixes []*net.IPNet) {
-	fmt.Printf("%s NTP Logger - %s\n\n", config.SERVER_NAME, config.SERVER_VERSION)
-
 	addr := net.UDPAddr{
 		Port: config.SERVER_PORT,
 		IP:   net.ParseIP(config.SERVER_IP),
@@ -73,14 +70,14 @@ func startNTPServer(prefixes []*net.IPNet) {
 
 	// File manager to switch dates for files
 	fm := &ntp.FileManager{}
-	fm.rotateFileIfNeeded()
-	fm.logDummyPacket() // needed for correct timestamps
+	fm.RotateFileIfNeeded()
+	fm.LogDummyPacket() // needed for correct timestamps
 
 	// Use all CPU cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// Channel for queuing packets
-	packets := make(chan PacketData, 100)
+	packets := make(chan ntp.PacketData, 100)
 
 	// Worker pool setup
 	var wg sync.WaitGroup
@@ -99,7 +96,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 
 		// Read packet
 		n, clientAddr, err := conn.ReadFromUDP(buffer)
-		fm.rotateFileIfNeeded()
+		fm.RotateFileIfNeeded()
 
 		// handle timeout and error
 		if err != nil {
@@ -116,7 +113,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 		copy(packetData, buffer[:n])
 
 		// Send request to the worker pool
-		packets <- PacketData{Addr: clientAddr, Data: packetData}
+		packets <- ntp.PacketData{Addr: clientAddr, Data: packetData}
 
 	}
 
@@ -126,7 +123,9 @@ func startNTPServer(prefixes []*net.IPNet) {
 }
 
 func main() {
-	ipPrefixes, err := prefix.loadPrefixes()
+	fmt.Printf("%s NTP Logger - %s\n\n", config.SERVER_NAME, config.SERVER_VERSION)
+
+	ipPrefixes, err := prefix.LoadPrefixes()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[-] Error loading IP prefixes: %v\n", err)
 		return

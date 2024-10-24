@@ -23,7 +23,7 @@ func ntpTime(t time.Time) uint64 {
 }
 
 // parseNTP validates that the incoming UDP packet is an NTP packet based on NTP protocol headers.
-func parseNTPPacket(data []byte) (bool, int) {
+func ParseNTPPacket(data []byte) (bool, int) {
 	// Check that the packet has at least the length of a basic NTP packet
 	if len(data) < 48 {
 		return false, 0
@@ -47,7 +47,7 @@ func parseNTPPacket(data []byte) (bool, int) {
 	return true, int(version)
 }
 
-func makeNTPResponse(version int, requestData []byte) []byte {
+func MakeNTPResponse(version int, requestData []byte) []byte {
 	response := make([]byte, 48)
 
 	// Set NTP Version and Server Mode

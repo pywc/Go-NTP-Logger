@@ -41,7 +41,7 @@ func getNewFileName() string {
 	return newFilename
 }
 
-func (fm *FileManager) rotateFileIfNeeded() error {
+func (fm *FileManager) RotateFileIfNeeded() error {
 	fm.mutex.Lock()
 	defer fm.mutex.Unlock()
 
@@ -78,7 +78,7 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 
 // We need this because of relative timestamps in packet;
 // without this, all first packet in file will have a timestamp of zero
-func (fm *FileManager) logDummyPacket() {
+func (fm *FileManager) LogDummyPacket() {
 	// Create IPv4 and UDP layers
 	ipLayer := &layers.IPv4{
 		Version: 4,
@@ -111,7 +111,7 @@ func (fm *FileManager) logDummyPacket() {
 	fm.WritePacket(captureInfo, buffer.Bytes())
 }
 
-func logNTPPacket(packet PacketData, version int, writer *pcapgo.Writer) {
+func (fm *FileManager) LogNTPPacket(packet PacketData, version int) {
 	// Create IPv4 and UDP layers
 	ipLayer := &layers.IPv4{
 		Version:  4,
@@ -149,7 +149,7 @@ func logNTPPacket(packet PacketData, version int, writer *pcapgo.Writer) {
 		CaptureLength: len(buffer.Bytes()),
 		Length:        len(buffer.Bytes()),
 	}
-	writer.WritePacket(captureInfo, buffer.Bytes())
+	fm.writer.WritePacket(captureInfo, buffer.Bytes())
 
 	fmt.Printf("[+] Logged NTP packet from IP: %s (version %d)\n", packet.Addr.IP, version)
 }
