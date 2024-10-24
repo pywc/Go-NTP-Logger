@@ -1,6 +1,7 @@
 # Go NTP Logger
  
-This tool acts as a NTP server and a logger. You can use this tool for logging the NTP packets received from your desired IP prefixes.
+This program functions as a (pseudo-)NTP server and a logger. 
+You can use this program for logging NTP packets received from desired IP address ranges.
 
 ### Usage
 
