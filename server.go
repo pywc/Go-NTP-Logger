@@ -132,7 +132,7 @@ func main() {
 		return
 	}
 
-	newpath := filepath.Join(".", "packets")
+	newpath := filepath.Join(".", "output")
 	_ = os.MkdirAll(newpath, os.ModePerm)
 
 	startNTPServer(ipPrefixes)

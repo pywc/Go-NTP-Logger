@@ -26,15 +26,15 @@ func getCurrentDate() string {
 }
 
 func getNewFileName() string {
-	files, _ := filepath.Glob("packets/" + OUTPUT_FILE_PREFIX + "*.pcap")
-	newFilename := fmt.Sprintf("%s-%s.pcap", "packets/"+OUTPUT_FILE_PREFIX, getCurrentDate())
+	files, _ := filepath.Glob("output/" + OUTPUT_FILE_PREFIX + "*.pcap")
+	newFilename := fmt.Sprintf("%s-%s.pcap", "output/"+OUTPUT_FILE_PREFIX, getCurrentDate())
 
 	// handle duplicate files by adding current time to suffix
 	for _, file := range files {
 		if newFilename == file {
 			hours, minutes, seconds := time.Now().Clock()
 
-			newFilename = fmt.Sprintf("%s-%s_%02d%02d%02d.pcap", "packets/"+OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
+			newFilename = fmt.Sprintf("%s-%s_%02d%02d%02d.pcap", "output/"+OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
 		}
 	}
 
