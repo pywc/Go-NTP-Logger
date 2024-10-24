@@ -6,7 +6,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/pywc/Go-NTP-Logger/config"
+	"github.com/pywc/Go-NTP-Logger/tree/main/config"
 )
 
 // PacketData holds the data required for each request.
