@@ -5,11 +5,13 @@ This tool acts as a NTP server and a logger. You can use this tool for logging t
 ### Usage
 
 1. Install `go`
-2. Install pckages with `go get`
-3. Edit `config/config.go` file with your desired server configurations
-4. Create a text file (e.g. `prefixes.txt`) consisting of IP prefixes you want to log
-5. Run `go run server.go`
-6. Fun and profit
+2. Configure the IP address and the identifier of the machine in `config/config.go`
+3. Create a text file (e.g. `prefixes.txt`) consisting of IP prefixes desired to be logged
+4. Run `./setup.sh`
+5. `sudo su`
+6. Run `go run .`
+7. Detach from tmux by pressing `Ctrl-B / D`
+8. Fun and profit
 
 ### Example Configuration
 
