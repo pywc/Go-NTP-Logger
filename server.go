@@ -54,7 +54,7 @@ func workerPool(conn *net.UDPConn, prefixes []*net.IPNet, fileManager *FileManag
 
 // startNTPServer initializes the UDP server to handle NTP requests.
 func startNTPServer(prefixes []*net.IPNet) {
-	fmt.Printf("%s NTP Server - %s\n\n", SERVER_NAME, SERVER_VERSION)
+	fmt.Printf("%s NTP Logger - %s\n\n", SERVER_NAME, SERVER_VERSION)
 
 	addr := net.UDPAddr{
 		Port: SERVER_PORT,

@@ -8,7 +8,7 @@ var SERVER_PORT = 123
 
 // IO config
 var IP_PREFIX_FILE = "prefixes.txt"
-var OUTPUT_FILE_PREFIX = "packets/" + "ucsd_sysnet" // do not add ./ at front
+var OUTPUT_FILE_PREFIX = "ucsd_sysnet" // do not add ./ at front
 
 // NTP config
 var NTP_REF_ID = []byte{132, 239, 1, 6} // UCSD GPS IP
