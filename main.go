@@ -28,6 +28,12 @@ func handleNTPPacket(conn *net.UDPConn, packet ntp.PacketData, prefixes []*net.I
 		return
 	}
 
+	currentTime := time.Now()
+	date := currentTime.Format("2006-01-02")
+	hours, minutes, seconds := currentTime.Clock()
+
+	fmt.Printf("[+] %s %d:%d:%d - Received from IP: %s (version %d)\n", date, hours, minutes, seconds, packet.Addr.IP, version)
+
 	// Check if the source IP matches the allowed prefixes
 	if prefix.IPMatchesPrefixes(packet.Addr.IP, prefixes) {
 		fm.LogNTPPacket(packet, version)
