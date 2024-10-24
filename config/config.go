@@ -3,7 +3,7 @@ package config
 // Server config
 var SERVER_NAME = "UCSD Sysnet"
 var SERVER_VERSION = "v1.0"
-var SERVER_IP = "0.0.0.0"
+var SERVER_IP = "137.110.222.27"
 var SERVER_PORT = 123
 
 // IO config
