@@ -24,3 +24,4 @@ go.work
 prefixes.txt
 *.pcap
 config.go
+.DS_Store
