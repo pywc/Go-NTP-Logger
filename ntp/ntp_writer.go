@@ -26,15 +26,15 @@ func getCurrentDate() string {
 }
 
 func getNewFileName() string {
-	files, _ := filepath.Glob("output/" + OUTPUT_FILE_PREFIX + "*.pcap")
-	newFilename := fmt.Sprintf("%s-%s.pcap", "output/"+OUTPUT_FILE_PREFIX, getCurrentDate())
+	files, _ := filepath.Glob("output/" + config.OUTPUT_FILE_PREFIX + "*.pcap")
+	newFilename := fmt.Sprintf("%s-%s.pcap", "output/"+config.OUTPUT_FILE_PREFIX, getCurrentDate())
 
 	// handle duplicate files by adding current time to suffix
 	for _, file := range files {
 		if newFilename == file {
 			hours, minutes, seconds := time.Now().Clock()
 
-			newFilename = fmt.Sprintf("%s-%s_%02d%02d%02d.pcap", "output/"+OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
+			newFilename = fmt.Sprintf("%s-%s_%02d%02d%02d.pcap", "output/"+config.OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
 		}
 	}
 
@@ -117,13 +117,13 @@ func logNTPPacket(packet PacketData, version int, writer *pcapgo.Writer) {
 		Version:  4,
 		IHL:      5,
 		SrcIP:    packet.Addr.IP,
-		DstIP:    net.ParseIP(SERVER_IP),
+		DstIP:    net.ParseIP(config.SERVER_IP),
 		Protocol: layers.IPProtocolUDP,
 		TTL:      64,
 	}
 	udpLayer := &layers.UDP{
 		SrcPort: layers.UDPPort(packet.Addr.Port),
-		DstPort: layers.UDPPort(SERVER_PORT),
+		DstPort: layers.UDPPort(config.SERVER_PORT),
 	}
 	udpLayer.SetNetworkLayerForChecksum(ipLayer)
 

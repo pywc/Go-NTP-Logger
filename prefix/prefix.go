@@ -11,7 +11,7 @@ import (
 
 // loadPrefixes reads IP prefixes from a fixed file "prefixes.txt" and returns a slice of net.IPNet objects.
 func loadPrefixes() ([]*net.IPNet, error) {
-	file, err := os.Open(IP_PREFIX_FILE)
+	file, err := os.Open(config.IP_PREFIX_FILE)
 	if err != nil {
 		return nil, err
 	}

@@ -55,20 +55,20 @@ func makeNTPResponse(version int, requestData []byte) []byte {
 	response[0] += 4
 
 	// Set Stratum (e.g., 2 for secondary server)
-	response[1] = byte(NTP_STRATUM)
+	response[1] = byte(config.NTP_STRATUM)
 
 	// Set Poll Interval (default 4)
-	response[2] = byte(NTP_POLL_INTERVAL)
+	response[2] = byte(config.NTP_POLL_INTERVAL)
 
 	// Precision (arbitrary value, e.g., -10)
-	response[3] = byte(NTP_PRECISION)
+	response[3] = byte(config.NTP_PRECISION)
 
 	// Root delay and dispersion (arbitrary values for example)
 	binary.BigEndian.PutUint32(response[4:], 0x00000000)
 	binary.BigEndian.PutUint32(response[8:], 0x00000003)
 
 	// Reference ID (UCSD GPS IP)
-	copy(response[12:16], NTP_REF_ID)
+	copy(response[12:16], config.NTP_REF_ID)
 
 	// Set timestamps
 	currentTime := time.Now()

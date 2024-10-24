@@ -24,14 +24,14 @@ func shouldIgnorePacket(addr *net.UDPAddr) bool {
 
 func handleNTPPacket(conn *net.UDPConn, packet PacketData, prefixes []*net.IPNet, writer *pcapgo.Writer) {
 	// Ignore packets coming from router addresses or if not valid NTP packets
-	isNTP, version := parseNTPPacket(packet.Data)
+	isNTP, version := ntp.parseNTPPacket(packet.Data)
 	if shouldIgnorePacket(packet.Addr) || !isNTP {
 		return
 	}
 
 	// Check if the source IP matches the allowed prefixes
-	if IPMatchesPrefixes(packet.Addr.IP, prefixes) {
-		logNTPPacket(packet, version, writer)
+	if prefix.IPMatchesPrefixes(packet.Addr.IP, prefixes) {
+		ntp.logNTPPacket(packet, version, writer)
 	}
 
 	// Send a true NTP response
@@ -39,7 +39,7 @@ func handleNTPPacket(conn *net.UDPConn, packet PacketData, prefixes []*net.IPNet
 }
 
 func sendNTPResponse(conn *net.UDPConn, version int, addr *net.UDPAddr, requestData []byte) {
-	response := makeNTPResponse(version, requestData)
+	response := ntp.makeNTPResponse(version, requestData)
 
 	_, err := conn.WriteToUDP(response, addr)
 	if err != nil {
@@ -57,11 +57,11 @@ func workerPool(conn *net.UDPConn, prefixes []*net.IPNet, fileManager *FileManag
 
 // startNTPServer initializes the UDP server to handle NTP requests.
 func startNTPServer(prefixes []*net.IPNet) {
-	fmt.Printf("%s NTP Logger - %s\n\n", SERVER_NAME, SERVER_VERSION)
+	fmt.Printf("%s NTP Logger - %s\n\n", config.SERVER_NAME, config.SERVER_VERSION)
 
 	addr := net.UDPAddr{
-		Port: SERVER_PORT,
-		IP:   net.ParseIP(SERVER_IP),
+		Port: config.SERVER_PORT,
+		IP:   net.ParseIP(config.SERVER_IP),
 	}
 
 	conn, err := net.ListenUDP("udp", &addr)
@@ -72,7 +72,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 	defer conn.Close()
 
 	// File manager to switch dates for files
-	fm := &FileManager{}
+	fm := &ntp.FileManager{}
 	fm.rotateFileIfNeeded()
 	fm.logDummyPacket() // needed for correct timestamps
 
