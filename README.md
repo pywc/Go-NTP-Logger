@@ -4,14 +4,15 @@ This tool acts as a NTP server and a logger. You can use this tool for logging t
 
 ### Usage
 
-1. Install `go`
-2. Configure the IP address and the identifier of the machine in `config/config.go`
-3. Create a text file (e.g. `prefixes.txt`) consisting of IP prefixes desired to be logged
-4. Run `./setup.sh`
-5. `sudo su`
-6. Run `go run .`
-7. Detach from tmux by pressing `Ctrl-B / D`
-8. Fun and profit
+1. Install `golang`
+2. Clone this repo
+3. Configure the IP address and the identifier of the machine in `config/config.go`
+4. Create a text file (e.g. `prefixes.txt`) consisting of IP prefixes desired to be logged
+5. Run `./setup.sh`
+6. `sudo su`
+7. Run `go run .`
+8. Detach from tmux by pressing `Ctrl-B / D`
+9. Fun and profit
 
 ### Example Configuration
 
