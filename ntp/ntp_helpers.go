@@ -1,10 +1,12 @@
-package main
+package ntp
 
 import (
 	"encoding/binary"
 	"math"
 	"net"
 	"time"
+
+	"github.com/pywc/Go-NTP-Logger/config"
 )
 
 // PacketData holds the data required for each request.

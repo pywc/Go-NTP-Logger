@@ -1,4 +1,4 @@
-package main
+package ntp
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
+	"github.com/pywc/Go-NTP-Logger/config"
 )
 
 type FileManager struct {
