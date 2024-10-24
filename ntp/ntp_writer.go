@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -26,17 +25,8 @@ func getCurrentDate() string {
 }
 
 func getNewFileName() string {
-	files, _ := filepath.Glob("output/" + config.OUTPUT_FILE_PREFIX + "*.pcap")
-	newFilename := fmt.Sprintf("%s-%s.pcap", "output/"+config.OUTPUT_FILE_PREFIX, getCurrentDate())
-
-	// handle duplicate files by adding current time to suffix
-	for _, file := range files {
-		if newFilename == file {
-			hours, minutes, seconds := time.Now().Clock()
-
-			newFilename = fmt.Sprintf("%s-%s_%02d%02d%02d.pcap", "output/"+config.OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
-		}
-	}
+	hours, minutes, seconds := time.Now().Clock()
+	newFilename := fmt.Sprintf("%s_%s_%02d%02d%02d.pcap", "output/"+config.OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
 
 	return newFilename
 }
