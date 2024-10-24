@@ -23,4 +23,3 @@ go.work
 # data files
 prefixes.txt
 *.pcap
-config.go
