@@ -22,7 +22,7 @@ func shouldIgnorePacket(addr *net.UDPAddr) bool {
 	return strings.HasSuffix(ip, ".1")
 }
 
-func handleNTPPacket(conn *net.UDPConn, packet PacketData, prefixes []*net.IPNet, writer *pcapgo.Writer) {
+func handleNTPPacket(conn *net.UDPConn, packet ntp.PacketData, prefixes []*net.IPNet, writer *pcapgo.Writer) {
 	// Ignore packets coming from router addresses or if not valid NTP packets
 	isNTP, version := ntp.parseNTPPacket(packet.Data)
 	if shouldIgnorePacket(packet.Addr) || !isNTP {
@@ -48,7 +48,7 @@ func sendNTPResponse(conn *net.UDPConn, version int, addr *net.UDPAddr, requestD
 }
 
 // workerPool processes incoming NTP requests using multiple workers.
-func workerPool(conn *net.UDPConn, prefixes []*net.IPNet, fileManager *FileManager, packets <-chan PacketData, wg *sync.WaitGroup) {
+func workerPool(conn *net.UDPConn, prefixes []*net.IPNet, fileManager *ntp.FileManager, packets <-chan ntp.PacketData, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for packet := range packets {
 		handleNTPPacket(conn, packet, prefixes, fileManager.writer)
@@ -126,7 +126,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 }
 
 func main() {
-	ipPrefixes, err := loadPrefixes()
+	ipPrefixes, err := prefix.loadPrefixes()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[-] Error loading IP prefixes: %v\n", err)
 		return
