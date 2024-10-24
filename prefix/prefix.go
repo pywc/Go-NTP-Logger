@@ -6,7 +6,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/pywc/Go-NTP-Logger/tree/main/config"
+	"github.com/pywc/Go-NTP-Logger/config"
 )
 
 // loadPrefixes reads IP prefixes from a fixed file "prefixes.txt" and returns a slice of net.IPNet objects.

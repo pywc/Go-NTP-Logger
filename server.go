@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/google/gopacket/pcapgo"
-	"github.com/pywc/Go-NTP-Logger/tree/main/config"
-	"github.com/pywc/Go-NTP-Logger/tree/main/ntp"
-	"github.com/pywc/Go-NTP-Logger/tree/main/prefix"
+	"github.com/pywc/Go-NTP-Logger/config"
+	"github.com/pywc/Go-NTP-Logger/ntp"
+	"github.com/pywc/Go-NTP-Logger/prefix"
 )
 
 func shouldIgnorePacket(addr *net.UDPAddr) bool {
