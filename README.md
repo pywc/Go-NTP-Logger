@@ -5,10 +5,11 @@ This tool acts as a NTP server and a logger. You can use this tool for logging t
 ### Usage
 
 1. Install `go`
-2. Create `config/config.go` file consisting of your desired server configuration
-3. Create a text file consisting of IP prefixes you want to log
-4. Run `run.sh`
-5. Fun and profit
+2. Install pckages with `go get`
+3. Edit `config/config.go` file with your desired server configurations
+4. Create a text file (e.g. `prefixes.txt`) consisting of IP prefixes you want to log
+5. Run `go run server.go`
+6. Fun and profit
 
 ### Example Configuration
 
