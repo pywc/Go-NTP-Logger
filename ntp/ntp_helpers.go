@@ -16,7 +16,7 @@ type PacketData struct {
 }
 
 // ntpTime calculates the NTP time (seconds since 1900) from the current Unix time (seconds since 1970).
-func ntpTime(t time.Time) uint64 {
+func NTPTime(t time.Time) uint64 {
 	seconds := uint64(t.Unix()) + 2208988800 // Convert Unix time to NTP epoch
 	fraction := uint64((t.Nanosecond() * int(math.Pow(2, 32))) / 1e9)
 	return (seconds << 32) | fraction
@@ -73,10 +73,10 @@ func MakeNTPResponse(version int, requestData []byte) []byte {
 	// Set timestamps
 	currentTime := time.Now()
 	originTime := binary.BigEndian.Uint64(requestData[40:48])
-	binary.BigEndian.PutUint64(response[16:], ntpTime(currentTime.Add(-time.Hour))) // Reference Timestamp
+	binary.BigEndian.PutUint64(response[16:], NTPTime(currentTime.Add(-time.Hour))) // Reference Timestamp
 	binary.BigEndian.PutUint64(response[24:], originTime)                           // Origin Timestamp
-	binary.BigEndian.PutUint64(response[32:], ntpTime(currentTime))                 // Receive Timestamp
-	binary.BigEndian.PutUint64(response[40:], ntpTime(currentTime))                 // Transmit Timestamp
+	binary.BigEndian.PutUint64(response[32:], NTPTime(currentTime))                 // Receive Timestamp
+	binary.BigEndian.PutUint64(response[40:], NTPTime(currentTime))                 // Transmit Timestamp
 
 	return response
 }
