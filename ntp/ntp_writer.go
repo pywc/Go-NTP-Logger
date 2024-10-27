@@ -66,6 +66,41 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 	fm.writer.WritePacket(packet, data)
 }
 
+// We need this because of relative timestamps in packet;
+// without this, all first packet in file will have a timestamp of zero
+func (fm *FileManager) LogDummyPacket() {
+	// Create IPv4 and UDP layers
+	ipLayer := &layers.IPv4{
+		Version: 4,
+		IHL:     5,
+		SrcIP:   net.IPv4(127, 0, 0, 1),
+		DstIP:   net.IPv4(127, 0, 0, 1),
+		TTL:     64,
+	}
+
+	// Prepare gopacket serialization buffer
+	buffer := gopacket.NewSerializeBuffer()
+	options := gopacket.SerializeOptions{
+		FixLengths:       true,
+		ComputeChecksums: true,
+	}
+	err := gopacket.SerializeLayers(buffer, options,
+		ipLayer,
+	)
+	if err != nil {
+		fmt.Printf("[-] Error serializing packet: %v\n", err)
+		return
+	}
+
+	// Write the packet data to the pcap file
+	captureInfo := gopacket.CaptureInfo{
+		Timestamp:     time.Now(),
+		CaptureLength: len(buffer.Bytes()),
+		Length:        len(buffer.Bytes()),
+	}
+	fm.WritePacket(captureInfo, buffer.Bytes())
+}
+
 func (fm *FileManager) LogNTPPacket(packet PacketData, version int) {
 	// Create IPv4 and UDP layers
 	ipLayer := &layers.IPv4{
@@ -106,5 +141,9 @@ func (fm *FileManager) LogNTPPacket(packet PacketData, version int) {
 	}
 	fm.writer.WritePacket(captureInfo, buffer.Bytes())
 
-	fmt.Printf("[+] Logged NTP packet from IP: %s (version %d)\n", packet.Addr.IP, version)
+	currentTime := time.Now()
+	date := currentTime.Format("2006-01-02")
+	hours, minutes, seconds := currentTime.Clock()
+
+	fmt.Printf("[+] %s %02d:%02d:%02d - Logged: %s (NTP version %d)\n", date, hours, minutes, seconds, packet.Addr.IP, version)
 }
