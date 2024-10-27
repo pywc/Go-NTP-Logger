@@ -55,7 +55,7 @@ func workerPool(prefixes []*net.IPNet, fm *ntp.FileManager, packets <-chan gopac
 
 // startNTPServer initializes the UDP server to handle NTP requests.
 func startNTPServer(prefixes []*net.IPNet) {
-	device := "eth0" // Replace with your network interface
+	device := config.NETWORK_INTERFACE // Replace with your network interface
 	snapshotLen := int32(1024)
 	promiscuous := false
 	timeout := pcap.BlockForever
