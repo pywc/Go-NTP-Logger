@@ -99,7 +99,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 }
 
 func main() {
-	fmt.Printf("%s NTP Logger - %s\n\n", config.SERVER_NAME, config.SERVER_VERSION)
+	fmt.Printf("Go NTP Logger - %s\n\n", config.SERVER_NAME)
 
 	ipPrefixes, err := ip.LoadPrefixes()
 	if err != nil {
