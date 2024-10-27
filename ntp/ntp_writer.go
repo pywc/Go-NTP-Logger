@@ -66,5 +66,5 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 }
 
 func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
-	fm.writer.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
+	fm.writer.WritePacket(packet.Metadata().CaptureInfo, packet.Data()[14:])
 }
