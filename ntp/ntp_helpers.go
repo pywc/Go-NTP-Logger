@@ -6,6 +6,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/google/gopacket"
 	"github.com/pywc/Go-NTP-Logger/config"
 )
 
@@ -23,7 +24,9 @@ func NTPTime(t time.Time) uint64 {
 }
 
 // parseNTP validates that the incoming UDP packet is an NTP packet based on NTP protocol headers.
-func ParseNTPPacket(data []byte) (bool, int) {
+func ParseNTPPacket(packet gopacket.Packet) (bool, int) {
+	data := packet.Data()
+
 	// Check that the packet has at least the length of a basic NTP packet
 	if len(data) < 48 {
 		return false, 0

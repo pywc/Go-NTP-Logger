@@ -1,10 +1,11 @@
-package prefix
+package ip
 
 import (
 	"bufio"
 	"fmt"
 	"net"
 	"os"
+	"strings"
 
 	"github.com/pywc/Go-NTP-Logger/config"
 )
@@ -43,4 +44,9 @@ func IPMatchesPrefixes(ip net.IP, prefixes []*net.IPNet) bool {
 		}
 	}
 	return false
+}
+
+// ignore if ntp broadcast from router
+func ShouldIgnorePacket(ip net.IP) bool {
+	return strings.HasSuffix(ip.String(), ".1")
 }
