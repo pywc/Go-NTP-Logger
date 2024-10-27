@@ -28,11 +28,11 @@ func handleNTPPacket(conn *net.UDPConn, packet ntp.PacketData, prefixes []*net.I
 		return
 	}
 
-	currentTime := time.Now()
-	date := currentTime.Format("2006-01-02")
-	hours, minutes, seconds := currentTime.Clock()
+	// currentTime := time.Now()
+	// date := currentTime.Format("2006-01-02")
+	// hours, minutes, seconds := currentTime.Clock()
 
-	fmt.Printf("[+] %s %d:%d:%d - Received from IP: %s (version %d)\n", date, hours, minutes, seconds, packet.Addr.IP, version)
+	// fmt.Printf("[+] %s %02d:%02d:%02d - Received from IP: %s (version %d)\n", date, hours, minutes, seconds, packet.Addr.IP, version)
 
 	// Check if the source IP matches the allowed prefixes
 	if prefix.IPMatchesPrefixes(packet.Addr.IP, prefixes) {
@@ -77,7 +77,6 @@ func startNTPServer(prefixes []*net.IPNet) {
 	// File manager to switch dates for files
 	fm := &ntp.FileManager{}
 	fm.RotateFileIfNeeded()
-	fm.LogDummyPacket() // needed for correct timestamps
 
 	// Use all CPU cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -95,7 +94,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 
 	// Infinitely handle incoming packets
 	fmt.Println("[*] Listening for NTP traffic...")
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 4096)
 	for {
 		// timeout for rotating file if date changed
 		conn.SetReadDeadline(time.Now().Add(5 * time.Second))
