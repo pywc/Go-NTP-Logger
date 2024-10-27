@@ -66,6 +66,7 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 }
 
 func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
+	// BEcause for some reason go prepends MAC addresses
 	data := packet.Data()[14:]
 	captureInfo := gopacket.CaptureInfo{
 		Timestamp:     time.Now(),
