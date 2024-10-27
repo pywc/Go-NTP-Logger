@@ -45,27 +45,27 @@ func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.File
 	}
 
 	// Send NTP response
-	sendNTPResponse(version, udpLayer.Payload, ipLayer.SrcIP, udpLayer.SrcPort)
+	// sendNTPResponse(version, udpLayer.Payload, ipLayer.SrcIP, udpLayer.SrcPort)
 }
 
-func sendNTPResponse(version int, payload []byte, dstIP net.IP, dstPort layers.UDPPort) {
-	conn, err := net.DialUDP("udp4", nil, &net.UDPAddr{
-		IP:   dstIP,
-		Port: int(dstPort),
-	})
-	if err != nil {
-		log.Println("Failed to connect to destination:", err)
-		return
-	}
-	defer conn.Close()
+// func sendNTPResponse(version int, payload []byte, dstIP net.IP, dstPort layers.UDPPort) {
+// 	conn, err := net.DialUDP("udp4", nil, &net.UDPAddr{
+// 		IP:   dstIP,
+// 		Port: int(dstPort),
+// 	})
+// 	if err != nil {
+// 		log.Println("Failed to connect to destination:", err)
+// 		return
+// 	}
+// 	defer conn.Close()
 
-	response := ntp.MakeNTPResponse(version, payload)
+// 	response := ntp.MakeNTPResponse(version, payload)
 
-	_, err = conn.Write(response)
-	if err != nil {
-		fmt.Printf("[-] Error sending NTP response: %v\n", err)
-	}
-}
+// 	_, err = conn.Write(response)
+// 	if err != nil {
+// 		fmt.Printf("[-] Error sending NTP response: %v\n", err)
+// 	}
+// }
 
 // workerPool processes incoming NTP requests using multiple workers.
 func workerPool(prefixes []*net.IPNet, fm *ntp.FileManager, packets <-chan gopacket.Packet, wg *sync.WaitGroup) {
