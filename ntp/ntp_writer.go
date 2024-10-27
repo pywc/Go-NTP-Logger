@@ -67,10 +67,4 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 
 func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
 	fm.writer.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
-
-	currentTime := time.Now()
-	date := currentTime.Format("2006-01-02")
-	hours, minutes, seconds := currentTime.Clock()
-
-	fmt.Printf("[+] %s %02d:%02d:%02d - Logged: %s (NTP version %d)\n", date, hours, minutes, seconds, packet.Addr.IP, version)
 }
