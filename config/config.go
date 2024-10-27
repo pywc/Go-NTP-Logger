@@ -1,6 +1,5 @@
 package config
 
-var SERVER_NAME = "UCSD Sysnet"
-var NETWORK_INTERFACE = "eth0"
+var IDENTIFIER = "ucsd_sysnet" // do not add ./ at front
+var NETWORK_INTERFACE = "eno1"
 var IP_PREFIX_FILE = "prefixes.txt"
-var OUTPUT_FILE_PREFIX = "ucsd_sysnet" // do not add ./ at front

@@ -25,7 +25,7 @@ func getCurrentDate() string {
 
 func getNewFileName() string {
 	hours, minutes, seconds := time.Now().Clock()
-	newFilename := fmt.Sprintf("%s_%s_%02d%02d%02d.pcap", "output/"+config.OUTPUT_FILE_PREFIX, getCurrentDate(), hours, minutes, seconds)
+	newFilename := fmt.Sprintf("%s_%s_%02d%02d%02d.pcap", "output/"+config.IDENTIFIER, getCurrentDate(), hours, minutes, seconds)
 
 	return newFilename
 }
