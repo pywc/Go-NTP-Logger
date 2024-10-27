@@ -1,38 +1,15 @@
 # Go NTP Logger
  
-This program functions as a (pseudo-)NTP server and a logger. 
-You can use this program for logging NTP packets received from desired IP address ranges.
+Go NTP logger  functions as a logger to be used in conjunction with a preferred NTP server instance. 
+You can use this for filtering NTP packets received from desired IP address ranges.
 
 ### Usage
 
-1. Install `golang`
-2. Clone this repo
-3. Configure the IP address and the identifier of the machine in `config/config.go`
-4. Create a text file (e.g. `prefixes.txt`) consisting of IP prefixes desired to be logged
-5. Run `./setup.sh`
-6. `sudo su`
-7. Run `go run .`
-8. Detach from tmux by pressing `Ctrl-B / D`
-9. Fun and profit
-
-### Example Configuration
-
-```
-package config
-
-// Server config
-var SERVER_NAME = "UCSD Sysnet"
-var SERVER_VERSION = "v1.0"
-var SERVER_IP = "0.0.0.0"
-var SERVER_PORT = 123
-
-// IO config
-var IP_PREFIX_FILE = "prefixes.txt"
-var OUTPUT_FILE_PREFIX = "packets/" + "ucsd_sysnet" // do not add ./ at front
-
-// NTP config
-var NTP_REF_ID = []byte{132, 239, 1, 6} // UCSD GPS IP
-var NTP_STRATUM = 2                     // 2: secondary server
-var NTP_POLL_INTERVAL = 4               // default
-var NTP_PRECISION = 0xF6                // -10
-```
+1. Clone this repo
+2. Configure the identifier and the network interface of the machine in `config/config.go`
+3. Add a text file (e.g. `prefixes.txt`) consisting of IP prefixes desired to be logged
+4. Run `./setup.sh`
+5. `sudo su`
+6. Run `go run .`
+7. Detach from tmux by pressing `Ctrl-B / D`
+8. See the pcap files in `output` (pcaps are rotated at midnight)
