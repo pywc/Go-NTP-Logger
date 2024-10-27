@@ -1,25 +1,8 @@
 package ntp
 
 import (
-	"math"
-	"net"
-	"time"
-
 	"github.com/google/gopacket/layers"
 )
-
-// PacketData holds the data required for each request.
-type PacketData struct {
-	Addr *net.UDPAddr
-	Data []byte
-}
-
-// ntpTime calculates the NTP time (seconds since 1900) from the current Unix time (seconds since 1970).
-func NTPTime(t time.Time) uint64 {
-	seconds := uint64(t.Unix()) + 2208988800 // Convert Unix time to NTP epoch
-	fraction := uint64((t.Nanosecond() * int(math.Pow(2, 32))) / 1e9)
-	return (seconds << 32) | fraction
-}
 
 // parseNTP validates that the incoming UDP packet is an NTP packet based on NTP protocol headers.
 func ParseNTPRecord(udp *layers.UDP) (bool, int) {
