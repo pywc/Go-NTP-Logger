@@ -2,7 +2,6 @@ package ntp
 
 import (
 	"fmt"
-	"net"
 	"os"
 	"sync"
 	"time"
@@ -66,45 +65,8 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 	fm.writer.WritePacket(packet, data)
 }
 
-func (fm *FileManager) LogNTPPacket(packet PacketData, version int) {
-	// Create IPv4 and UDP layers
-	ipLayer := &layers.IPv4{
-		Version:  4,
-		IHL:      5,
-		SrcIP:    packet.Addr.IP,
-		DstIP:    net.ParseIP(config.SERVER_IP),
-		Protocol: layers.IPProtocolUDP,
-		TTL:      64,
-	}
-	udpLayer := &layers.UDP{
-		SrcPort: layers.UDPPort(packet.Addr.Port),
-		DstPort: layers.UDPPort(config.SERVER_PORT),
-	}
-	udpLayer.SetNetworkLayerForChecksum(ipLayer)
-
-	// Prepare gopacket serialization buffer
-	buffer := gopacket.NewSerializeBuffer()
-	options := gopacket.SerializeOptions{
-		FixLengths:       true,
-		ComputeChecksums: true,
-	}
-	err := gopacket.SerializeLayers(buffer, options,
-		ipLayer,
-		udpLayer,
-		gopacket.Payload(packet.Data),
-	)
-	if err != nil {
-		fmt.Printf("[-] Error serializing packet: %v\n", err)
-		return
-	}
-
-	// Write the packet data to the pcap file
-	captureInfo := gopacket.CaptureInfo{
-		Timestamp:     time.Now(),
-		CaptureLength: len(buffer.Bytes()),
-		Length:        len(buffer.Bytes()),
-	}
-	fm.writer.WritePacket(captureInfo, buffer.Bytes())
+func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
+	fm.writer.WritePacket(packet.Metadata().CaptureInfo, packet.Data())
 
 	currentTime := time.Now()
 	date := currentTime.Format("2006-01-02")

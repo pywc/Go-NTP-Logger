@@ -8,44 +8,60 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+	"time"
 
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/pywc/Go-NTP-Logger/config"
-	"github.com/pywc/Go-NTP-Logger/ntp"
 	"github.com/pywc/Go-NTP-Logger/ip"
+	"github.com/pywc/Go-NTP-Logger/ntp"
 )
 
 func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.FileManager) {
-	ipLayer := packet.Layer(layers.LayerTypeIPv4)
-	udpLayer := packet.Layer(layers.LayerTypeUDP)
-
-	if ipLayer == nil || udpLayer == nil {
+	ipLayerParsed := packet.Layer(layers.LayerTypeIPv4)
+	udpLayerParsed := packet.Layer(layers.LayerTypeUDP)
+	if ipLayerParsed == nil || udpLayerParsed == nil {
 		return
 	}
-	ip, _ := ipLayer.(*layers.IPv4)
-	udp, _ := udpLayer.(*layers.UDP)
+	ipLayer, _ := ipLayerParsed.(*layers.IPv4)
+	udpLayer, _ := udpLayerParsed.(*layers.UDP)
 
 	// Ignore packets coming from router addresses or if not valid NTP packets
-	isNTP, version := ntp.ParseNTPPacket(udp)
-	if ip.ShouldIgnoreIP(ip.SrcIP.String()) || !isNTP {
+	isNTP, version := ntp.ParseNTPRecord(udpLayer)
+	if ip.ShouldIgnoreIP(ipLayer.SrcIP) || !isNTP {
 		return
 	}
 
 	// Log if the source IP matches the allowed prefixes
-	if ip.IPMatchesPrefixes(ip.SrcIP, prefixes) {
-		fm.LogNTPPacket(packet, version)
+	if ip.IPMatchesPrefixes(ipLayer.SrcIP, prefixes) {
+		fm.LogNTPPacket(packet)
+
+		currentTime := time.Now()
+		date := currentTime.Format("2006-01-02")
+		hours, minutes, seconds := currentTime.Clock()
+
+		fmt.Printf("[+] %s %02d:%02d:%02d - Logged: %s (NTP version %d)\n", date, hours, minutes, seconds, ipLayer.SrcIP.String(), version)
 	}
 
 	// Send NTP response
-	sendNTPResponse(version, packet, ip.SrcIP, ip.por)
+	sendNTPResponse(version, udpLayer.Payload, ipLayer.SrcIP, udpLayer.SrcPort)
 }
 
-func sendNTPResponse(version int, packet gopacket.Packet) {
-	response := ntp.MakeNTPResponse(version, packet.Data())
+func sendNTPResponse(version int, payload []byte, dstIP net.IP, dstPort layers.UDPPort) {
+	conn, err := net.DialUDP("udp4", nil, &net.UDPAddr{
+		IP:   dstIP,
+		Port: int(dstPort),
+	})
+	if err != nil {
+		log.Println("Failed to connect to destination:", err)
+		return
+	}
+	defer conn.Close()
 
-	_, err := conn.WriteToUDP(response, addr)
+	response := ntp.MakeNTPResponse(version, payload)
+
+	_, err = conn.Write(response)
 	if err != nil {
 		fmt.Printf("[-] Error sending NTP response: %v\n", err)
 	}
@@ -151,7 +167,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 func main() {
 	fmt.Printf("%s NTP Logger - %s\n\n", config.SERVER_NAME, config.SERVER_VERSION)
 
-	ipPrefixes, err := prefix.LoadPrefixes()
+	ipPrefixes, err := ip.LoadPrefixes()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[-] Error loading IP prefixes: %v\n", err)
 		return

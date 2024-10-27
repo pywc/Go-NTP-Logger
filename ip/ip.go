@@ -47,6 +47,6 @@ func IPMatchesPrefixes(ip net.IP, prefixes []*net.IPNet) bool {
 }
 
 // ignore if ntp broadcast from router
-func ShouldIgnorePacket(ip net.IP) bool {
+func ShouldIgnoreIP(ip net.IP) bool {
 	return strings.HasSuffix(ip.String(), ".1")
 }
