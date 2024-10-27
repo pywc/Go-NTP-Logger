@@ -43,29 +43,7 @@ func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.File
 
 		fmt.Printf("[+] %s %02d:%02d:%02d - Logged: %s (NTP version %d)\n", date, hours, minutes, seconds, ipLayer.SrcIP.String(), version)
 	}
-
-	// Send NTP response
-	// sendNTPResponse(version, udpLayer.Payload, ipLayer.SrcIP, udpLayer.SrcPort)
 }
-
-// func sendNTPResponse(version int, payload []byte, dstIP net.IP, dstPort layers.UDPPort) {
-// 	conn, err := net.DialUDP("udp4", nil, &net.UDPAddr{
-// 		IP:   dstIP,
-// 		Port: int(dstPort),
-// 	})
-// 	if err != nil {
-// 		log.Println("Failed to connect to destination:", err)
-// 		return
-// 	}
-// 	defer conn.Close()
-
-// 	response := ntp.MakeNTPResponse(version, payload)
-
-// 	_, err = conn.Write(response)
-// 	if err != nil {
-// 		fmt.Printf("[-] Error sending NTP response: %v\n", err)
-// 	}
-// }
 
 // workerPool processes incoming NTP requests using multiple workers.
 func workerPool(prefixes []*net.IPNet, fm *ntp.FileManager, packets <-chan gopacket.Packet, wg *sync.WaitGroup) {
@@ -87,18 +65,6 @@ func startNTPServer(prefixes []*net.IPNet) {
 		log.Fatal(err)
 	}
 	defer handle.Close()
-
-	// addr := net.UDPAddr{
-	// 	Port: config.SERVER_PORT,
-	// 	IP:   net.ParseIP(config.SERVER_IP),
-	// }
-
-	// conn, err := net.ListenUDP("udp", &addr)
-	// if err != nil {
-	// 	fmt.Printf("[-] Error starting UDP server: %v\n", err)
-	// 	return
-	// }
-	// defer conn.Close()
 
 	// File manager to switch dates for files
 	fm := &ntp.FileManager{}
@@ -130,38 +96,6 @@ func startNTPServer(prefixes []*net.IPNet) {
 	// Close channel and wait for all workers to finish
 	close(packets)
 	wg.Wait()
-
-	// buffer := make([]byte, 4096)
-	// for {
-	// 	// timeout for rotating file if date changed
-	// 	conn.SetReadDeadline(time.Now().Add(5 * time.Second))
-
-	// 	// Read packet
-	// 	n, clientAddr, err := conn.ReadFromUDP(buffer)
-	// 	fm.RotateFileIfNeeded()
-
-	// 	// handle timeout and error
-	// 	if err != nil {
-	// 		if opErr, ok := err.(*net.OpError); ok && opErr.Timeout() {
-	// 			// do nothing
-	// 		} else {
-	// 			fmt.Printf("[-] Error reading packet: %v\n", err)
-	// 		}
-
-	// 		continue
-	// 	}
-
-	// 	packetData := make([]byte, n)
-	// 	copy(packetData, buffer[:n])
-
-	// 	// Send request to the worker pool
-	// 	packets <- ntp.PacketData{Addr: clientAddr, Data: packetData}
-
-	// }
-
-	// TODO: unreachable code, need better cleanup
-	// close(packets)
-	// wg.Wait()
 }
 
 func main() {

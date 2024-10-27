@@ -1,13 +1,11 @@
 package ntp
 
 import (
-	"encoding/binary"
 	"math"
 	"net"
 	"time"
 
 	"github.com/google/gopacket/layers"
-	"github.com/pywc/Go-NTP-Logger/config"
 )
 
 // PacketData holds the data required for each request.
@@ -53,38 +51,4 @@ func ParseNTPRecord(udp *layers.UDP) (bool, int) {
 	}
 
 	return true, int(version)
-}
-
-func MakeNTPResponse(version int, requestData []byte) []byte {
-	response := make([]byte, 48)
-
-	// Set NTP Version and Server Mode
-	response[0] = (response[0] & 0xC7) | byte(version<<3)
-	response[0] += 4
-
-	// Set Stratum (e.g., 2 for secondary server)
-	response[1] = byte(config.NTP_STRATUM)
-
-	// Set Poll Interval (default 4)
-	response[2] = byte(config.NTP_POLL_INTERVAL)
-
-	// Precision (arbitrary value, e.g., -10)
-	response[3] = byte(config.NTP_PRECISION)
-
-	// Root delay and dispersion (arbitrary values for example)
-	binary.BigEndian.PutUint32(response[4:], 0x00000000)
-	binary.BigEndian.PutUint32(response[8:], 0x00000003)
-
-	// Reference ID (UCSD GPS IP)
-	copy(response[12:16], config.NTP_REF_ID)
-
-	// Set timestamps
-	currentTime := time.Now()
-	originTime := binary.BigEndian.Uint64(requestData[40:48])
-	binary.BigEndian.PutUint64(response[16:], NTPTime(currentTime.Add(-time.Hour))) // Reference Timestamp
-	binary.BigEndian.PutUint64(response[24:], originTime)                           // Origin Timestamp
-	binary.BigEndian.PutUint64(response[32:], NTPTime(currentTime))                 // Receive Timestamp
-	binary.BigEndian.PutUint64(response[40:], NTPTime(currentTime))                 // Transmit Timestamp
-
-	return response
 }

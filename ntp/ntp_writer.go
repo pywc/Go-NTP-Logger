@@ -66,5 +66,12 @@ func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
 }
 
 func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
-	fm.writer.WritePacket(packet.Metadata().CaptureInfo, packet.Data()[14:])
+	data := packet.Data()[14:]
+	captureInfo := gopacket.CaptureInfo{
+		Timestamp:     time.Now(),
+		CaptureLength: len(data),
+		Length:        len(data),
+	}
+
+	fm.writer.WritePacket(captureInfo, data)
 }
