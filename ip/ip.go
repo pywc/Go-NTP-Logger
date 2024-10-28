@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
-
-	"github.com/pywc/Go-NTP-Logger/config"
 )
 
 // loadPrefixes reads IP prefixes from a fixed file "prefixes.txt" and returns a slice of net.IPNet objects.
-func LoadPrefixes() ([]*net.IPNet, error) {
-	file, err := os.Open(config.IP_PREFIX_FILE)
+func LoadPrefixes(prefixFilename string) ([]*net.IPNet, error) {
+	file, err := os.Open(prefixFilename)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +41,4 @@ func IPMatchesPrefixes(ip net.IP, prefixes []*net.IPNet) bool {
 		}
 	}
 	return false
-}
-
-// ignore if ntp broadcast from router
-func ShouldIgnoreIP(ip net.IP) bool {
-	return strings.HasSuffix(ip.String(), ".1")
 }

@@ -11,30 +11,28 @@ import (
 	"time"
 
 	"github.com/google/gopacket"
-	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcap"
 	"github.com/pywc/Go-NTP-Logger/config"
 	"github.com/pywc/Go-NTP-Logger/ip"
 	"github.com/pywc/Go-NTP-Logger/ntp"
 )
 
+// handleNTPPacket processes incoming NTP requests and logs them if the source IP is in the prefix lixt.
 func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.FileManager) {
-	ipLayerParsed := packet.Layer(layers.LayerTypeIPv4)
-	udpLayerParsed := packet.Layer(layers.LayerTypeUDP)
-	if ipLayerParsed == nil || udpLayerParsed == nil {
+	ipLayer, udpLayer := ntp.GetLayers(packet)
+	if ipLayer == nil || udpLayer == nil {
 		return
 	}
-	ipLayer, _ := ipLayerParsed.(*layers.IPv4)
-	udpLayer, _ := udpLayerParsed.(*layers.UDP)
 
-	// Ignore packets coming from router addresses or if not valid NTP packets
+	// Ignore packets if broadcast coming from router or if not valid NTP
 	isNTP, version := ntp.ParseNTPRecord(udpLayer)
-	if ip.ShouldIgnoreIP(ipLayer.SrcIP) || !isNTP {
+	if ntp.ShouldIgnoreIP(ipLayer.SrcIP) || !isNTP {
 		return
 	}
 
 	// Log if the source IP matches the allowed prefixes
 	if ip.IPMatchesPrefixes(ipLayer.SrcIP, prefixes) {
+		fm.RotateFileIfNeeded(config.IDENTIFIER)
 		fm.LogNTPPacket(packet)
 
 		currentTime := time.Now()
@@ -53,13 +51,14 @@ func workerPool(prefixes []*net.IPNet, fm *ntp.FileManager, packets <-chan gopac
 	}
 }
 
-// startNTPServer initializes the UDP server to handle NTP requests.
-func startNTPServer(prefixes []*net.IPNet) {
-	device := config.NETWORK_INTERFACE // Replace with your network interface
+// startNTPLogger initializes a packet capture session to handle NTP requests.
+func startNTPLogger(prefixes []*net.IPNet) {
+	device := config.NETWORK_INTERFACE
 	snapshotLen := int32(1024)
 	promiscuous := false
 	timeout := pcap.BlockForever
 
+	// Start packet capture session
 	handle, err := pcap.OpenLive(device, snapshotLen, promiscuous, timeout)
 	if err != nil {
 		log.Fatal(err)
@@ -68,7 +67,6 @@ func startNTPServer(prefixes []*net.IPNet) {
 
 	// File manager to switch dates for files
 	fm := &ntp.FileManager{}
-	fm.RotateFileIfNeeded()
 
 	// Use all CPU cores
 	runtime.GOMAXPROCS(runtime.NumCPU())
@@ -82,8 +80,6 @@ func startNTPServer(prefixes []*net.IPNet) {
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
 		go workerPool(prefixes, fm, packets, &wg)
-
-		// go workerPool(conn, prefixes, fm, packets, &wg)
 	}
 
 	// Infinitely handle incoming packets
@@ -101,7 +97,7 @@ func startNTPServer(prefixes []*net.IPNet) {
 func main() {
 	fmt.Printf("Go NTP Logger - %s\n\n", config.IDENTIFIER)
 
-	ipPrefixes, err := ip.LoadPrefixes()
+	ipPrefixes, err := ip.LoadPrefixes(config.IP_PREFIX_FILE)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[-] Error loading IP prefixes: %v\n", err)
 		return
@@ -110,5 +106,5 @@ func main() {
 	newpath := filepath.Join(".", "output")
 	_ = os.MkdirAll(newpath, os.ModePerm)
 
-	startNTPServer(ipPrefixes)
+	startNTPLogger(ipPrefixes)
 }
