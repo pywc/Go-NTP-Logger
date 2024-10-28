@@ -58,12 +58,6 @@ func (fm *FileManager) RotateFileIfNeeded(identifier string) error {
 	return nil
 }
 
-func (fm *FileManager) WritePacket(packet gopacket.CaptureInfo, data []byte) {
-	fm.mutex.Lock()
-	defer fm.mutex.Unlock()
-	fm.writer.WritePacket(packet, data)
-}
-
 func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
 	// BEcause for some reason go prepends MAC addresses
 	data := packet.Data()[14:]
@@ -73,5 +67,7 @@ func (fm *FileManager) LogNTPPacket(packet gopacket.Packet) {
 		Length:        len(data),
 	}
 
+	fm.mutex.Lock()
+	defer fm.mutex.Unlock()
 	fm.writer.WritePacket(captureInfo, data)
 }
