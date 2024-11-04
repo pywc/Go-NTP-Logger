@@ -58,6 +58,7 @@ func (fm *FileManager) RotateFileIfNeeded(identifier string) error {
 			return err
 		}
 		fm.outputCsv.WriteString("timestamp,ip\n")
+		fm.outputCsv.Close()
 		fm.outputCsv, err = os.OpenFile(newCsv, os.O_APPEND, 0666)
 		if err != nil {
 			fmt.Println(err)
