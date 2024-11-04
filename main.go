@@ -33,7 +33,7 @@ func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.File
 	// Log if the source IP matches the allowed prefixes
 	if ip.IPMatchesPrefixes(ipLayer.SrcIP, prefixes) {
 		fm.RotateFileIfNeeded(config.IDENTIFIER)
-		fm.LogNTPPacket(packet)
+		fm.LogNTPPacket(packet, ipLayer.SrcIP.String())
 
 		currentTime := time.Now()
 		date := currentTime.Format("2006-01-02")
