@@ -53,17 +53,12 @@ func (fm *FileManager) RotateFileIfNeeded(identifier string) error {
 			return err
 		}
 
-		fm.outputCsv, err = os.Create(newCsv)
-		if err != nil {
-			return err
-		}
-		fm.outputCsv.WriteString("timestamp,ip\n")
-		fm.outputCsv.Close()
-		fm.outputCsv, err = os.OpenFile(newCsv, os.O_APPEND, 0666)
+		fm.outputCsv, err = os.OpenFile(newCsv, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
+		fm.outputCsv.WriteString("timestamp,ip\n")
 
 		fm.writer = pcapgo.NewWriter(fm.outputPcap)
 		if err := fm.writer.WriteFileHeader(65536, layers.LinkTypeIPv4); err != nil {
