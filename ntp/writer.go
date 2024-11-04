@@ -91,5 +91,7 @@ func (fm *FileManager) LogNTPPacket(packet gopacket.Packet, ipString string) {
 	fm.writer.WritePacket(captureInfo, data)
 
 	timeString := strconv.FormatInt(packet.Metadata().Timestamp.Unix(), 10)
-	fm.outputCsv.WriteString(timeString + "," + ipString + "\n")
+	toWrite := timeString + "," + ipString + "\n"
+	fmt.Println(toWrite)
+	fm.outputCsv.WriteString(toWrite)
 }
