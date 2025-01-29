@@ -2,6 +2,7 @@ package ntp
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"strconv"
 	"sync"
@@ -10,6 +11,8 @@ import (
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket/pcapgo"
+	"github.com/pywc/Go-NTP-Logger/config"
+	"github.com/pywc/Go-NTP-Logger/ip"
 )
 
 type FileManager struct {
@@ -32,7 +35,7 @@ func getNewFileName(identifier string) (string, string) {
 	return newPcap, newCsv
 }
 
-func (fm *FileManager) RotateFileIfNeeded(identifier string) error {
+func (fm *FileManager) RotateFileIfNeeded(identifier string, prefixes *[]*net.IPNet) error {
 	fm.mutex.Lock()
 	defer fm.mutex.Unlock()
 
@@ -65,9 +68,13 @@ func (fm *FileManager) RotateFileIfNeeded(identifier string) error {
 			return err
 		}
 
+		// TODO: Handle error
+		*prefixes, _ = ip.LoadPrefixes(config.IP_PREFIX_FILE)
+
 		fm.currentDate = current
 		fmt.Println("[*] Created new packet file:", newPcap)
 		fmt.Println("[*] Created new CSV file:", newCsv)
+		fmt.Println("[*] IP database updated:", config.IP_PREFIX_FILE)
 
 	}
 	return nil

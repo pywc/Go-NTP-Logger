@@ -34,8 +34,8 @@ func LoadPrefixes(prefixFilename string) ([]*net.IPNet, error) {
 }
 
 // IPMatchesPrefixes checks if an IP address matches any of the given IP prefixes.
-func IPMatchesPrefixes(ip net.IP, prefixes []*net.IPNet) bool {
-	for _, prefix := range prefixes {
+func IPMatchesPrefixes(ip net.IP, prefixes *[]*net.IPNet) bool {
+	for _, prefix := range *prefixes {
 		if prefix.Contains(ip) {
 			return true
 		}

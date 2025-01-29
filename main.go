@@ -18,7 +18,7 @@ import (
 )
 
 // handleNTPPacket processes incoming NTP requests and logs them if the source IP is in the prefix lixt.
-func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.FileManager) {
+func handleNTPPacket(packet gopacket.Packet, prefixes *[]*net.IPNet, fm *ntp.FileManager) {
 	ipLayer, udpLayer := ntp.GetLayers(packet)
 	if ipLayer == nil || udpLayer == nil {
 		return
@@ -32,7 +32,7 @@ func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.File
 
 	// Log if the source IP matches the allowed prefixes
 	if ip.IPMatchesPrefixes(ipLayer.SrcIP, prefixes) {
-		fm.RotateFileIfNeeded(config.IDENTIFIER)
+		fm.RotateFileIfNeeded(config.IDENTIFIER, prefixes)
 		fm.LogNTPPacket(packet, ipLayer.SrcIP.String())
 
 		currentTime := time.Now()
@@ -44,7 +44,7 @@ func handleNTPPacket(packet gopacket.Packet, prefixes []*net.IPNet, fm *ntp.File
 }
 
 // workerPool processes incoming NTP requests using multiple workers.
-func workerPool(prefixes []*net.IPNet, fm *ntp.FileManager, packets <-chan gopacket.Packet, wg *sync.WaitGroup) {
+func workerPool(prefixes *[]*net.IPNet, fm *ntp.FileManager, packets <-chan gopacket.Packet, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for packet := range packets {
 		handleNTPPacket(packet, prefixes, fm)
@@ -79,7 +79,7 @@ func startNTPLogger(prefixes []*net.IPNet) {
 	numWorkers := runtime.NumCPU()
 	for i := 0; i < numWorkers; i++ {
 		wg.Add(1)
-		go workerPool(prefixes, fm, packets, &wg)
+		go workerPool(&prefixes, fm, packets, &wg)
 	}
 
 	// Infinitely handle incoming packets
