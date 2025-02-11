@@ -8,9 +8,23 @@ import (
 	"github.com/google/gopacket/layers"
 )
 
-// ShouldIgnore IP checks if the IP address is from the router.
+// ShouldIgnore IP checks if the IP address is from the router or localhost.
 func ShouldIgnoreIP(ip net.IP) bool {
-	return strings.HasSuffix(ip.String(), ".1")
+	addrs, _ := net.InterfaceAddrs()
+
+	// ignore gateway
+	if strings.HasSuffix(ip.String(), ".1") {
+		return true
+	}
+
+	// ignore localhost
+	for _, addr := range addrs {
+		if strings.Split(addr.String(), "/")[0] == ip.String() {
+			return true
+		}
+	}
+
+	return false
 }
 
 // GetLayers gets the IP and the UDP layers of the packet.
